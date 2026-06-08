@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: shortener-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: shortener
+      POSTGRES_USER: shortener
+      POSTGRES_PASSWORD: shortener
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shortener -d shortener"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: ./backend
+    container_name: shortener-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/shortener
+      SPRING_DATASOURCE_USERNAME: shortener
+      SPRING_DATASOURCE_PASSWORD: shortener
+      APP_BASE_URL: http://localhost:8080
+      SAFETY_THRESHOLD: "0.75"
+      RL_CAPACITY: "20"
+      RL_REFILL: "10"
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:

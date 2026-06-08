@@ -1,0 +1,75 @@
+server:
+  port: 8080
+  forward-headers-strategy: framework
+  error:
+    include-message: never
+    include-stacktrace: never
+
+spring:
+  application:
+    name: ai-url-shortener
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/shortener}
+    username: ${SPRING_DATASOURCE_USERNAME:shortener}
+    password: ${SPRING_DATASOURCE_PASSWORD:shortener}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 5000
+      validation-timeout: 3000
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          time_zone: UTC
+  jackson:
+    default-property-inclusion: non_null
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+  task:
+    execution:
+      shutdown:
+        graceful: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when-authorized
+
+logging:
+  level:
+    root: INFO
+    com.ankush.shortener: INFO
+    org.hibernate.SQL: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
+
+app:
+  base-url: ${APP_BASE_URL:http://localhost:8080}
+  code-length: ${CODE_LENGTH:7}
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://localhost:4173}
+  safety:
+    enabled: ${SAFETY_ENABLED:true}
+    reject-threshold: ${SAFETY_THRESHOLD:0.75}
+    # Path to a local ONNX model. Leave blank to use the heuristic scorer.
+    # When set, supply both model-path and vocab-path to a BERT cross-encoder
+    # ONNX file and its tokenizer vocabulary.
+    model-path: ${SAFETY_MODEL_PATH:}
+    vocab-path: ${SAFETY_VOCAB_PATH:}
+  rate-limit:
+    capacity: ${RL_CAPACITY:60}
+    refill-per-minute: ${RL_REFILL:60}

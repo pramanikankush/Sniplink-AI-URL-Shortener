@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:16-alpine:///shortener
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+
+app:
+  base-url: http://localhost:8080
+  code-length: 7
+  cors:
+    allowed-origins: "*"
+  safety:
+    enabled: true
+    reject-threshold: 0.75
+    model-path: ""
+    vocab-path: ""
+  rate-limit:
+    capacity: 1000
+    refill-per-minute: 1000
